@@ -33,9 +33,9 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     // MARK: - ExcelCollectionViewLayoutDelegate
-    
+    // 每一列的 宽高
     func collectionViewLayout(_ collectionViewLayout: ExcelCollectionViewLayout, sizeForItemAtColumn columnIndex: Int) -> CGSize {
-        if columnIndex == 0 {
+        if columnIndex == 0 { //第一列，根据最长的字符串，确定第一列的宽高
             let biggestMonth = months.max(by: { $1.count > $0.count })!
             let biggestString = biggestMonth.count > topLeftString.count ? biggestMonth : topLeftString
             
@@ -54,7 +54,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
                 String(describing: $1).count > String(describing: $0).count
             })!
         )
-        let topString = topLabels[columnIndex - 1]
+        let topString = topLabels[columnIndex - 1] //除了第一列以外的，确认宽高
         let biggestString = biggestValue.count > topString.count ? biggestValue : topString
         
         let size: CGSize = biggestString.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)])
@@ -63,15 +63,20 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
 
     // MARK: - Collection view
-    
+    /* 布局如下：
+      sec0/row0  sec0/row1 sec0/row2 ... sec0/rowN
+      sec1/row0  sec1/row1 sec1/row2 ... sec1/rowN
+      ...
+      secN/row0  secN/row1 secN/row2 ... secN/rowN
+   */
     // Rows
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return months.count + 1
+        return months.count + 1 // 行数，第一行是标题，所以要+1
     }
     
     // Columns
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return topLabels.count + 1
+        return topLabels.count + 1 // 列数，第一列是标题，所以要+1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
