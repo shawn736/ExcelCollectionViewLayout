@@ -12,12 +12,12 @@ import UIKit
      Calculate items' size at a particular column here.
      
      - parameters:
-         - collectionViewLayout: The current ExcelCollectionViewLayout placed in UICollectionView.
-         - columnIndex: The index of column which its items' size will be calculated.
+     - collectionViewLayout: The current ExcelCollectionViewLayout placed in UICollectionView.
+     - columnIndex: The index of column which its items' size will be calculated.
      
      - returns:
      A CGSize representation for items at a particular column index.
-    */
+     */
     @objc func collectionViewLayout(_ collectionViewLayout: ExcelCollectionViewLayout, sizeForItemAtColumn columnIndex: Int) -> CGSize
 }
 
@@ -30,10 +30,10 @@ import UIKit
  2)  -(CGSize) collectionViewContentSize 确定collectionView的所有内容的尺寸。
  3）-(NSArray *)layoutAttributesForElementsInRect:(CGRect)rect初始的layout的外观将由该方法返回的UICollectionViewLayoutAttributes来决定。
  4)在需要更新layout时，需要给当前layout发送
-    1)-invalidateLayout， 该消息会立即返回，并且预约在下一个loop的时候刷新当前layout
-    2)-prepareLayout，
-    3)依次再调用-collectionViewContentSize和-layoutAttributesForElementsInRect来生成更新后的布局。
-
+ 1)-invalidateLayout， 该消息会立即返回，并且预约在下一个loop的时候刷新当前layout
+ 2)-prepareLayout，
+ 3)依次再调用-collectionViewContentSize和-layoutAttributesForElementsInRect来生成更新后的布局。
+ 
  */
 
 public class ExcelCollectionViewLayout: UICollectionViewLayout {
@@ -46,7 +46,7 @@ public class ExcelCollectionViewLayout: UICollectionViewLayout {
         guard collectionView != nil else { fatalError("collectionView must not be nil. See the README for more details.") }
         return collectionView!.numberOfItems(inSection: 0)
     }
-  
+    
     // prepare准备方法被自动调用，以保证layout实例的正确
     override public func prepare() {
         guard let collectionView = collectionView else { fatalError("collectionView must not be nil. See the README for more details.") }
@@ -59,7 +59,7 @@ public class ExcelCollectionViewLayout: UICollectionViewLayout {
         
         for section in 0..<collectionView.numberOfSections {
             for item in 0..<collectionView.numberOfItems(inSection: section) {
-                if section != 0 && item != 0 { // 不需要粘性的内容
+                if section != 0 && item != 0  && section != 1{ // 不需要粘性的内容
                     continue
                 }
                 
@@ -67,6 +67,12 @@ public class ExcelCollectionViewLayout: UICollectionViewLayout {
                 if section == 0 { // 顶部（第一行）粘性
                     var frame = attributes.frame
                     frame.origin.y = collectionView.contentOffset.y
+                    attributes.frame = frame
+                }
+                
+                if section == 1 { // 顶部（第二行）粘性
+                    var frame = attributes.frame
+                    frame.origin.y = frame.size.height + collectionView.contentOffset.y
                     attributes.frame = frame
                 }
                 
@@ -127,10 +133,12 @@ public class ExcelCollectionViewLayout: UICollectionViewLayout {
                 let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 attributes.frame = CGRect(x: xOffset, y: yOffset, width: itemSize.width, height: itemSize.height).integral
                 
-                if section == 0 && index == 0 {
+                if section == 0 && index == 0 || section == 1 && index == 0 {
                     attributes.zIndex = 1024 // 设置(sec0row0)的第一项，使其能在第一列和第一行之上
-                } else if section == 0 || index == 0 {
+                } else if section == 0 || index == 0  {
                     attributes.zIndex = 1023 // 设置第一列和第一行在其余未设置的item之上
+                } else if section == 1 {
+                    attributes.zIndex = 1022 //设置第二行在其余未设置的item之上
                 }
                 
                 if section == 0 {
@@ -138,6 +146,13 @@ public class ExcelCollectionViewLayout: UICollectionViewLayout {
                     frame.origin.y = collectionView.contentOffset.y
                     attributes.frame = frame // 顶部（第一行）粘性，保持y值不变
                 }
+                
+                if section == 1 {
+                    var frame = attributes.frame
+                    frame.origin.y = frame.size.height + collectionView.contentOffset.y
+                    attributes.frame = frame // 顶部（第一行）粘性，保持y值不变
+                }
+                
                 if index == 0 {
                     var frame = attributes.frame
                     frame.origin.x = collectionView.contentOffset.x
