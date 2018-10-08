@@ -119,6 +119,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         
         if indexPath.section == 0 {
             label.text = topFirstRow[indexPath.row]
+            label.textColor = .black
         } else if indexPath.section == 1 {
             label.text = topSecondRow[indexPath.row]
             label.textColor = .black
