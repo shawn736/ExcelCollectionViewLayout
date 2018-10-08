@@ -16,19 +16,35 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // Data
     enum BigOuComplexityType: String {
       case excellent = "O(1)"
+      case excellent0 = "O(k)"
       case good = "O(logn)"
       case fair = "O(n)"
+      case fair0 = "O(n+k)"
+      case fair1 = "O(nk)"
       case bad = "O(nlogn)"
+      case horrible = "O((nlogn)^2)"
       case horrible0 = "O(n^2)"
       case horrible1 = "O(2^n)"
       case horrible2 = "O(n!)"
+      
     }
   
     let topFirstRow: [String] = ["Algorithm", "Time Complexity", "", "", "Space Complexity"]
     var topSecondRow: [String] = ["", "Best", "Average", "Worst", "Worst"]
     var allAlgorithmComplexityValues: [[String: [BigOuComplexityType]]] = [["Quicksort": [.bad, .bad, .horrible0, .good]],
                                                                           ["Mergesort": [.bad, .bad, .bad, .fair]],
-                                                                          ["Timsort": [.fair, .bad, .bad, .fair ]]]
+                                                                          ["Timsort": [.fair, .bad, .bad, .fair ]],
+                                                                          ["Heapsort": [.bad, .bad, .bad, .excellent]],
+                                                                          ["Bubble Sort": [.fair, .horrible0, .horrible0, .excellent]],
+                                                                          ["Insertion Sort": [.fair, .horrible0, .horrible0, .excellent]],
+                                                                          ["Selection Sort": [.horrible0, .horrible0, .horrible0, .excellent]],
+                                                                          ["Tree Sort": [.bad, .bad, .horrible0, .fair]],
+                                                                          ["Shell Sort": [.bad, .horrible, .horrible, .excellent]],
+                                                                          ["Bucket Sort": [.fair0, .fair0, .horrible0, .fair]],
+                                                                          ["Radix Sort": [.fair1, .fair1, .fair1, .fair0]],
+                                                                          ["Counting Sort": [.fair0, .fair0, .fair0, .excellent0]],
+                                                                          ["Cubesort": [.fair, .bad, .bad, .fair]],
+                                                                          ]
     var leftFirstColumn: [String] {
       return allAlgorithmComplexityValues.map{ $0.keys.first! }
     }
