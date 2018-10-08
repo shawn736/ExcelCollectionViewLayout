@@ -23,14 +23,20 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
       case horrible1 = "O(2^n)"
       case horrible2 = "O(n!)"
     }
-    let topLeftString: String = "Array Sorting"
-    let topFirstLabels: [String] = ["Time Complexity", " ", " ", "Space Complexity"]
-    let topSecondLabels: [String] = [" ","Best", "Average", "Worst", "Worst"]
-    let leftFirstColumnLabels: [String] = [ "Quicksort", "Mergesort", "Timsort"]  //  [" ", "Quicksort", "Mergesort", "Timsort", "Heapsort", "Bubble Sort", "Insertion Sort", "Selection Sort", "Tree Sort", "Shell Sort", "Bucket Sort", "Radix Sort", "Counting Sort", "Cubesort"]
-    var everyAlgorithmComplexityValues: [[BigOuComplexityType]] = [[.bad, .bad, .horrible0, .good],
-                                                                   [.bad, .bad, .bad, .fair],
-                                                                   [.fair, .bad, .bad, .fair ]]
-    
+  
+    let topFirstRow: [String] = ["Algorithm", "Time Complexity", "", "", "Space Complexity"]
+    var topSecondRow: [String] = ["", "Best", "Average", "Worst", "Worst"]
+    var allAlgorithmComplexityValues: [[String: [BigOuComplexityType]]] = [["Quicksort": [.bad, .bad, .horrible0, .good]],
+                                                                          ["Mergesort": [.bad, .bad, .bad, .fair]],
+                                                                          ["Timsort": [.fair, .bad, .bad, .fair ]]]
+    var leftFirstColumn: [String] {
+      return allAlgorithmComplexityValues.map{ $0.keys.first! }
+    }
+  
+    var complexityValues: [[BigOuComplexityType]] {
+      return allAlgorithmComplexityValues.map{ $0.values.first! }
+    }
+  
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.dataSource = self
@@ -46,7 +52,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // 每一列的 宽高
     func collectionViewLayout(_ collectionViewLayout: ExcelCollectionViewLayout, sizeForItemAtColumn columnIndex: Int) -> CGSize {
         if columnIndex == 0 { //第一列，根据最长的字符串，确定第一列的宽高
-            let longestSortName = leftFirstColumnLabels.max(by: { $1.count > $0.count })!
+            let longestSortName = leftFirstColumn.max(by: { $1.count > $0.count })!
+            let topLeftString = topFirstRow[0]
             let longestString = longestSortName.count > topLeftString.count ? longestSortName : topLeftString
             
             let size: CGSize = longestString.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)])
@@ -55,8 +62,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         }
         
         var columnData: [String] = []
-        for index in 0..<everyAlgorithmComplexityValues.count {
-            let type = everyAlgorithmComplexityValues[index][columnIndex - 1]
+        for index in 0..<complexityValues.count {
+            let type = complexityValues[index][columnIndex - 1]
             columnData.append(type.rawValue)
         }
         let longestValueName = String(describing:
@@ -64,7 +71,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
                 String(describing: $1).count > String(describing: $0).count
             })!
         )
-        let topString = topSecondLabels[columnIndex - 1] //除了第一列以外的，确认宽高
+        let topString = topSecondRow[columnIndex - 1] //除了第一列以外的，确认宽高
         let longestString = longestValueName.count > topString.count ? longestValueName : topString
         
         let size: CGSize = longestString.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)])
@@ -81,12 +88,12 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
    */
     // Rows
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return everyAlgorithmComplexityValues.count + 2 // 行数，前两行是标题，所以要+2
+        return allAlgorithmComplexityValues.count + 2 // 行数，前两行是标题，所以要+2
     }
     
     // Columns
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return topSecondLabels.count // 列数
+        return topSecondRow.count // 列数
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -94,19 +101,16 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         
         let label = cell.viewWithTag(10) as! UILabel
         
-        if indexPath.section == 0 && indexPath.row == 0 {
-            label.text = topLeftString
-        } else if indexPath.section == 0 {
-            label.text = topFirstLabels[indexPath.row - 1]
-            label.textColor = .black
+        if indexPath.section == 0 {
+            label.text = topFirstRow[indexPath.row]
         } else if indexPath.section == 1 {
-            label.text = topSecondLabels[indexPath.row]
+            label.text = topSecondRow[indexPath.row]
             label.textColor = .black
         } else if indexPath.row == 0 {
-            label.text = leftFirstColumnLabels[indexPath.section - 2]
+            label.text = leftFirstColumn[indexPath.section - 2]
             label.textColor = .black
         } else {
-            let type = everyAlgorithmComplexityValues[indexPath.section - 2][indexPath.row - 1]
+            let type = complexityValues[indexPath.section - 2][indexPath.row - 1]
             label.text = type.rawValue
             label.textColor = (type == .good) ? .green :  .red
         }
