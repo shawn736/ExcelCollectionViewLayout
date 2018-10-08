@@ -14,11 +14,22 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     @IBOutlet weak var collectionView: UICollectionView!
     
     // Data
-    let salary: Int = 2000
-    let topLeftString: String = "My Salary Control"
-    let topLabels: [String] = ["Salary", "Bills", "Shopping", "Parties", "Total"]
-    var months: [String] = []
-    var monthlyValues: [[Int]] = []
+    enum BigOuComplexityType: String {
+      case excellent = "O(1)"
+      case good = "O(logn)"
+      case fair = "O(n)"
+      case bad = "O(nlogn)"
+      case horrible0 = "O(n^2)"
+      case horrible1 = "O(2^n)"
+      case horrible2 = "O(n!)"
+    }
+    let topLeftString: String = "Array Sorting"
+    let topFirstLabels: [String] = ["Time Complexity", " ", " ", "Space Complexity"]
+    let topSecondLabels: [String] = [" ","Best", "Average", "Worst", "Worst"]
+    let leftFirstColumnLabels: [String] = [ "Quicksort", "Mergesort", "Timsort"]  //  [" ", "Quicksort", "Mergesort", "Timsort", "Heapsort", "Bubble Sort", "Insertion Sort", "Selection Sort", "Tree Sort", "Shell Sort", "Bucket Sort", "Radix Sort", "Counting Sort", "Cubesort"]
+    var everyAlgorithmComplexityValues: [[BigOuComplexityType]] = [[.bad, .bad, .horrible0, .good],
+                                                                   [.bad, .bad, .bad, .fair],
+                                                                   [.fair, .bad, .bad, .fair ]]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,35 +40,34 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             collectionLayout.delegate = self
         }
         
-        prepareData()
     }
     
     // MARK: - ExcelCollectionViewLayoutDelegate
     // 每一列的 宽高
     func collectionViewLayout(_ collectionViewLayout: ExcelCollectionViewLayout, sizeForItemAtColumn columnIndex: Int) -> CGSize {
         if columnIndex == 0 { //第一列，根据最长的字符串，确定第一列的宽高
-            let biggestMonth = months.max(by: { $1.count > $0.count })!
-            let biggestString = biggestMonth.count > topLeftString.count ? biggestMonth : topLeftString
+            let longestSortName = leftFirstColumnLabels.max(by: { $1.count > $0.count })!
+            let longestString = longestSortName.count > topLeftString.count ? longestSortName : topLeftString
             
-            let size: CGSize = biggestString.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)])
+            let size: CGSize = longestString.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)])
             let width: CGFloat = size.width + 30
             return CGSize(width: width, height: 70)
         }
         
         var columnData: [String] = []
-        for index in 0..<monthlyValues.count {
-            let valueFormatted = formatCurrency(monthlyValues[index][columnIndex - 1])
-            columnData.append(valueFormatted)
+        for index in 0..<everyAlgorithmComplexityValues.count {
+            let type = everyAlgorithmComplexityValues[index][columnIndex - 1]
+            columnData.append(type.rawValue)
         }
-        let biggestValue = String(describing:
+        let longestValueName = String(describing:
             columnData.max(by: {
                 String(describing: $1).count > String(describing: $0).count
             })!
         )
-        let topString = topLabels[columnIndex - 1] //除了第一列以外的，确认宽高
-        let biggestString = biggestValue.count > topString.count ? biggestValue : topString
+        let topString = topSecondLabels[columnIndex - 1] //除了第一列以外的，确认宽高
+        let longestString = longestValueName.count > topString.count ? longestValueName : topString
         
-        let size: CGSize = biggestString.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)])
+        let size: CGSize = longestString.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 17)])
         let width: CGFloat = size.width + 30
         return CGSize(width: width, height: 70)
     }
@@ -71,12 +81,12 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
    */
     // Rows
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return months.count + 1 // 行数，第一行是标题，所以要+1
+        return everyAlgorithmComplexityValues.count + 2 // 行数，前两行是标题，所以要+2
     }
     
     // Columns
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return topLabels.count + 1 // 列数，第一列是标题，所以要+1
+        return topSecondLabels.count // 列数
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -87,15 +97,18 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         if indexPath.section == 0 && indexPath.row == 0 {
             label.text = topLeftString
         } else if indexPath.section == 0 {
-            label.text = topLabels[indexPath.row - 1]
+            label.text = topFirstLabels[indexPath.row - 1]
+            label.textColor = .black
+        } else if indexPath.section == 1 {
+            label.text = topSecondLabels[indexPath.row]
             label.textColor = .black
         } else if indexPath.row == 0 {
-            label.text = months[indexPath.section - 1]
+            label.text = leftFirstColumnLabels[indexPath.section - 2]
             label.textColor = .black
         } else {
-            let value = monthlyValues[indexPath.section - 1][indexPath.row - 1]
-            label.text = formatCurrency(value)
-            label.textColor = value < 0 ? .red : .black
+            let type = everyAlgorithmComplexityValues[indexPath.section - 2][indexPath.row - 1]
+            label.text = type.rawValue
+            label.textColor = (type == .good) ? .green :  .red
         }
         
         if indexPath.section == 0 || indexPath.row == 0 {
@@ -108,52 +121,6 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         
         return cell
     }
-    
-    // MARK: - Data
-    
-    func prepareData() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM-yyyy"
-        
-        months.append(formatter.string(from: Date()))
-        for diff in 1...12 {
-            let diffDate = Calendar.current.date(byAdding: .month, value: -diff, to: Date())!
-            months.append(formatter.string(from: diffDate))
-        }
-        
-        for month in 0..<months.count {
-            for index in 0..<topLabels.count {
-                var value = salary
-                if index == topLabels.count - 1 {
-                    value = total(for: month)
-                } else if index != 0 {
-                    value = Int(arc4random_uniform(2000))
-                }
-                
-                if monthlyValues.count == month {
-                    monthlyValues.append([value])
-                } else {
-                    monthlyValues[month].append(value)
-                }
-            }
-        }
-    }
-    
-    func total(for month: Int) -> Int {
-        let data = monthlyValues[month]
-        
-        var total = data[0]
-        for index in 1..<data.count - 1 {
-            total -= data[index]
-        }
-        return total
-    }
-    
-    func formatCurrency(_ value: Int) -> String {
-        let number = NSNumber(value: value)
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        return formatter.string(from: number)!
-    }
+  
 }
 
